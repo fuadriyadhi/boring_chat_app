@@ -149,7 +149,7 @@ export default function Chat() {
         {message.map((e) => (
           <div
             key={e.id}
-            className={`w-auto p-4 bg-white flex flex-col rounded-lg shadow-md max-w-[50%]
+            className={`w-auto p-4 bg-white flex flex-col rounded-lg shadow-md max-w-[1000px]
             ${e.user.username !== signedUser.username ? "mr-auto" : "ml-auto"} last:mb-20`}
           >
             <p className={`${e.user.username !== signedUser.username ? "text-left" : "text-right"}`}>{e.message}</p>
