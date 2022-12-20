@@ -3,6 +3,8 @@ import { CgMenuGridO } from "react-icons/cg";
 import { AiOutlineSetting, AiOutlineLogout } from "react-icons/ai";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
+import { db } from "../firebaseServices";
+import { collection, doc, getDocs, setDoc, onSnapshot } from "firebase/firestore";
 
 function ChatMenu() {
   const navigate = useNavigate();
@@ -42,6 +44,28 @@ export default function Chat() {
   const [signedUser, setSignUser] = useState(JSON.parse(localStorage.getItem("boring_chat_user")));
   const [loading, setLoading] = useState(true);
 
+  //membaca data dari collection "chat"
+  const getChatCollection = async () => {
+    let arrayCol = [];
+    let chatColRef = await collection(db, "chat");
+    let result = await getDocs(chatColRef);
+    result.forEach((e) => {
+      arrayCol.push(e.data());
+    });
+    return arrayCol;
+  };
+
+  //triger ketika update di collection
+  const chatTrigger = ()=>{
+    let chatRef = collection(db, "chat")
+    onSnapshot(chatRef, (rec)=>{
+      getChatCollection()
+      .then(res => {
+        setMessage(res)
+      })
+    })
+  }
+
   //comp did mount
   useEffect(() => {
     let user = localStorage.getItem("boring_chat_user");
@@ -49,8 +73,17 @@ export default function Chat() {
       return (window.location.href = "/");
     }
 
+    getChatCollection().then((res) => {
+      setMessage(res);
+    });
+
     setLoading(false);
-  }, []);
+
+    //component did update
+    return ()=>{
+      chatTrigger()
+    }
+  }, [db]);
 
   //toggle menu
   const toggleMenu = () => {
@@ -82,6 +115,17 @@ export default function Chat() {
         user: user,
       },
     ]);
+
+    let chatRef = doc(db, "chat", Date.now() + signedUser.username);
+    setDoc(chatRef, {
+      id: Date.now(),
+      message: msg,
+      createdAt: Date.now(),
+      user: user,
+    }).then((res) => {
+      console.info(res);
+    });
+
     scrollToBottomMsg();
   };
 
@@ -104,13 +148,13 @@ export default function Chat() {
       <div className="w-full flex flex-col mt-auto py-[80px] px-3 gap-4">
         {message.map((e) => (
           <div
+            key={e.id}
             className={`w-auto p-4 bg-white flex flex-col rounded-lg shadow-md max-w-[50%]
             ${e.user.username !== signedUser.username ? "mr-auto" : "ml-auto"} last:mb-20`}
-            key={e.id}
           >
             <p className={`${e.user.username !== signedUser.username ? "text-left" : "text-right"}`}>{e.message}</p>
             <div className="mt-4 flex gap-2 items-center">
-              <img src={e.user.avatar} alt="" className="w-6 h-6" />
+              <img src={e.user.avatar} alt="avatar" className="w-6 h-6" />
               <div className="flex flex-col text-gray-400">
                 <small className="text-[8px]">{e.user.username}</small>
                 <small className="text-[8px]">{moment(e.createdAt).format("dddd DD/MM/YYYY hh:mm")}</small>
