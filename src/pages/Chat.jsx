@@ -56,15 +56,14 @@ export default function Chat() {
   };
 
   //triger ketika update di collection
-  const chatTrigger = ()=>{
-    let chatRef = collection(db, "chat")
-    onSnapshot(chatRef, (rec)=>{
-      getChatCollection()
-      .then(res => {
-        setMessage(res)
-      })
-    })
-  }
+  const chatTrigger = () => {
+    let chatRef = collection(db, "chat");
+    onSnapshot(chatRef, (rec) => {
+      getChatCollection().then((res) => {
+        setMessage(res);
+      });
+    });
+  };
 
   //comp did mount
   useEffect(() => {
@@ -80,9 +79,9 @@ export default function Chat() {
     setLoading(false);
 
     //component did update
-    return ()=>{
-      chatTrigger()
-    }
+    return () => {
+      chatTrigger();
+    };
   }, [db]);
 
   //toggle menu
@@ -149,7 +148,7 @@ export default function Chat() {
         {message.map((e) => (
           <div
             key={e.id}
-            className={`w-auto p-4 bg-white flex flex-col rounded-lg shadow-md max-w-[50&]
+            className={`w-auto p-4 bg-white flex flex-col rounded-lg shadow-md max-w-[100vw]
             ${e.user.username !== signedUser.username ? "mr-auto" : "ml-auto"} last:mb-20`}
           >
             <p className={`${e.user.username !== signedUser.username ? "text-left" : "text-right"} break-words`}>{e.message}</p>
